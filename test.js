@@ -1,40 +1,51 @@
+var clickedEl = null;
 var Clippie = {
-	getUrl: function() {
-		chrome.tabs.query({
-		  active: true,
-		  windowId: chrome.windows.WINDOW_ID_CURRENT
-		  },function(tabs){
-			var tab = tabs[0];
-			document.body.innerHTML = tab.url
-		});
-	},
 	getParameters: function(url) {
 		params = /#.*[?&]locale=([^&]+)(&|$)/;
 		alert(params.exec(url))
 	},
-	menu: function(){
-	    chrome.contextMenus.onClicked.addListener(clickHandler);
-		var menuNames = new Array();
-		menuNames = ["Object1","Object2"];
-		var length = menuNames.length;
+	mainMenu: function(){
+	    chrome.contextMenus.onClicked.addListener(this.clickHandler);
 		chrome.contextMenus.create({
 		    "id" : "ClippieMain",
 			"title" : "Clippie",
 			"contexts" : ["link"]
 			});
+	},
+	buildSubMenu: function(url){
+	    chrome.contextMenus.removeAll()
+		this.mainMenu()
+		splitUp = parseUri(url);
 		
-
-		chrome.contextMenus.create({
-			"title" : "object1",
-			"id" : "sub0",
-			"parentId" : "ClippieMain",
-			"contexts": ["link"],
-			"onclick" : clickHandler
-		});
-		
-		function clickHandler(e,tab){
-		  chrome.tabs.create({"url" : "http://mypetshark.com" });
+		for(index in splitUp.queryKey) { 
+		    var attr = splitUp.queryKey[index];
+            if	(attr != '' || attr != null){
+				chrome.contextMenus.create({
+					"title" : index,
+					"id" : attr,
+					"parentId" : "ClippieMain",
+					"contexts": ["link"],
+					"onclick" : this.clickHandler
+				});
+			}
 		}
-	}
+	},
+	clickHandler: function(e,tab){	 
+	 	var copyDiv = document.createElement('div');
+		copyDiv.contentEditable = true;
+		document.body.appendChild(copyDiv);
+		copyDiv.innerHTML = e.menuItemId;
+		copyDiv.unselectable = "off";
+		copyDiv.focus();
+		document.execCommand('SelectAll');
+		document.execCommand("Copy", false, null);
+		document.body.removeChild(copyDiv);
+	},
 };
- Clippie.menu();
+
+chrome.runtime.onMessage.addListener(
+  function(request, sender, sendResponse) {
+    if (request.greeting == "event"){
+		Clippie.buildSubMenu(request.message);
+	}
+});
