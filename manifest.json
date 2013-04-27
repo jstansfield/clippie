@@ -2,29 +2,27 @@
   "manifest_version": 2,
 
   "name": "Clippie",
-  "description": "Simple copy and paste solution for web variables",
+  "description": "A simple clipboard extension to help web developers, QA and UX engineers deal with URI variables.",
   "version": "0.1",
 
   "permissions": [
-	"tabs",
 	"contextMenus",
 	"clipboardWrite",
 	"clipboardRead"
   ],
-  "browser_action": {
-    "default_icon": "icon.png",
-    "default_popup": "popup.html"
-  },
   "content_scripts": [
 	  {
 	    "matches" : ["*://*/*"],
-		"js" : ["detectClick.js"]
+		"js" : ["detectClick.js","jquery-2.0.0.js"]
 	  }
   ],
   "background": {
-    "scripts": ["test.js","parseuri.js"]
+    "scripts": ["clippie.js","parseuri.js"]
   },
   "icons":{
-	"16": "icon.png"
+  "128": "clippie.png" ,
+	"16": "clippie.png",
+	"48": "clippie.png"
+	
   }
 }

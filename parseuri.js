@@ -1,7 +1,7 @@
 // parseUri 1.2.2
 // (c) Steven Levithan <stevenlevithan.com>
 // MIT License
-//http://blog.stevenlevithan.com/archives/parseuri
+// http://blog.stevenlevithan.com/archives/parseuri
 
 function parseUri (str) {
 	var	o   = parseUri.options,
