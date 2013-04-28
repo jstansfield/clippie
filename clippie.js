@@ -1,4 +1,4 @@
-var contexts = ["link","page"]
+var contexts = ["all"]
 var Clippie = {
 	buildMenu: function(uri){
 		chrome.contextMenus.removeAll()
