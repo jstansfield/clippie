@@ -1,17 +1,19 @@
-var clickedEl = null;
+var contexts = ["link","page"]
 var Clippie = {
 	buildMenu: function(uri){
 		chrome.contextMenus.removeAll()
-		chrome.contextMenus.onClicked.addListener(this.itemClick);
+		//chrome.contextMenus.onClicked.addListener(this.itemClick);
 		parsedUri = parseUri(uri);
 		staticItems = { 
 			"Domain" : parsedUri.host,
 			"Path" :  parsedUri.directory,
-			"Domain and path" :  parsedUri.host + parsedUri.directory
+			"File" : parsedUri.file,
+			"Full path" : parsedUri.path,
+			"All" :  parsedUri.host + parsedUri.directory + parsedUri.file
 		}
 		this.mainMenu();
 		this.subMenus();
-		this.domainItems(parsedUri);
+		this.domainItems(parsedUri,staticItems);
 		this.getItems(parsedUri);	
 	},
 	
@@ -19,7 +21,7 @@ var Clippie = {
 		chrome.contextMenus.create({
 			"id" : "ClippieMain",
 			"title" : "Clippie",
-			"contexts" : ["link"]
+			"contexts" : contexts
 			});
 	},
 	
@@ -28,42 +30,49 @@ var Clippie = {
 			"title" : "Domain/path",
 			"id" : "DomainVariables",
 			"parentId" : "ClippieMain",
-			"contexts": ["link"]
+			"contexts": contexts
 		});
 		chrome.contextMenus.create({
-			"title" : "GET Variables",
+			"title" : "GET/POST Variables",
 			"id" : "Get",
 			"parentId" : "ClippieMain",
-			"contexts": ["link"]
+			"contexts": contexts
 		});
 	},
 	
-	domainItems:function(parsedUri){
+	domainItems:function(parsedUri,staticItems){
 		for(index in staticItems){
-			chrome.contextMenus.create({
-				"title" : index + " (" + staticItems[index] + ")",
-				"parentId" : "DomainVariables",
-				"id" : staticItems[index],
-				"contexts": ["link"]
-			});
-		}
-	},
-	
-	getItems: function(){
-		for(index in parsedUri.queryKey) { 
-			var attr = parsedUri.queryKey[index];
-			if	(attr != '' || attr != null){
+			if(staticItems[index] != ""){
 				chrome.contextMenus.create({
-					"title" : index + " (" + attr + ")",
-					"id" : attr,
-					"parentId" : "Get",
-					"contexts": ["link"],
+					"title" : index + " : " + staticItems[index],
+					"id" : index,
+					"parentId" : "DomainVariables",
+					"contexts": contexts,
+					'onclick': function(info, tab) {
+						Clippie.itemClick(info, tab, staticItems);
+					}
 				});
 			}
 		}
 	},
-	itemClick: function(e,tab){	
-		Clippie.copyToClipboard(e.menuItemId)
+	
+	getItems: function(parsedUri){
+		for(index in parsedUri.queryKey) { 
+			if	(parsedUri.queryKey[index] != '' || parsedUri.queryKey[index] != null){
+				chrome.contextMenus.create({
+					"title" : index + " : " + parsedUri.queryKey[index],
+					"id" : index,
+					"parentId" : "Get",
+					"contexts": contexts,
+					'onclick': function(info, tab) {
+						Clippie.itemClick(info, tab, parsedUri.queryKey);
+					}
+				});
+			}
+		}
+	},
+	itemClick: function(e,tab,object){	
+		Clippie.copyToClipboard(object[e.menuItemId])
 	},
 	copyToClipboard: function(text){	 
 	 	var copyDiv = document.createElement('div');
@@ -80,7 +89,7 @@ var Clippie = {
 
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
-    if (request.greeting == "event"){
+    if (request.type == "link" || request.type == "page" || request.type == "form"){
 		Clippie.buildMenu(request.message);
 	}
 });
