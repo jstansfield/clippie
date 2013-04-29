@@ -3,7 +3,7 @@
 
   "name": "Clippie",
   "description": "A simple clipboard extension to help web developers, QA and UX engineers deal with URI variables.",
-  "version": "0.2",
+  "version": "0.2.1",
 
   "permissions": [
 	"contextMenus",
