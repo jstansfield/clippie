@@ -8,21 +8,22 @@ document.addEventListener("mousedown", function(event){
 			chrome.runtime.sendMessage({type: "link",message: element.href}, function(response) {});
 			menuSet= true;
 		}
-		else if(element.nodeName == "BUTTON" || (element.nodeName == "INPUT" && element.type == "submit")){
-			var uri = buildUri(parentElements);
-			if(uri != null){
-				chrome.runtime.sendMessage({type: "form",message: uri}, function(response) {});
-				menuSet = true;
-			}
-		}
 		else{
 			$(parentElements).each(function(index){
-				if(parentElements[index].nodeName == "A"){
-					chrome.runtime.sendMessage({type: "link",message: String(parentElements[index].href)}, function(response) {});
+				if(this.nodeName == "A"){
+
+					chrome.runtime.sendMessage({type: "link",message: String(this.href)}, function(response) {});
 					menuSet = true;
 				}
+				
+				if(this.nodeName == "FORM"){
+					var uri = buildUri(this);
+					if(uri != null){
+						chrome.runtime.sendMessage({type: "form",message: uri}, function(response) {});
+						menuSet = true;
+					}
+				}
 			})
-			
 		}
 		
 		if( menuSet == false){
@@ -31,19 +32,16 @@ document.addEventListener("mousedown", function(event){
 	}
 }, true);
 
-function buildUri(parentElements){
+function buildUri(element){
 	var uriString = null;
-	$(parentElements).each(function(){
-		if(this.nodeName == "FORM"){
-			uriString = this.action;
-			var mark = uriString.indexOf("?") == -1 ? "?" : "&";
-			uriString += mark + "Form method=" + this.method;
-			$(this).find(':input').each(function (input){
-				if(this.name != "" || this.name != null || this.name != undefined ){
-					uriString += "&" + this.name + "=" + encodeURIComponent(this.value);
-				}
-			});
+	uriString = element.action;
+	var mark = uriString.indexOf("?") == -1 ? "?" : "&";
+	uriString += mark + "Form_method=" + element.method;
+	$(element).find(':input').each(function (input){
+		if(this.name != "" || this.name != null || this.name != undefined ){
+			uriString += "&" + this.name + "=" + encodeURIComponent(this.value);
 		}
-	})
+	});
+
 	return uriString;
 }
