@@ -5,21 +5,21 @@ document.addEventListener("mousedown", function(event){
 	var menuSet = false
 	if(event.button == 2){
 		if(element.nodeName == "A"){
-			chrome.runtime.sendMessage({type: "link",message: element.href}, function(response) {});
+			chrome.runtime.sendMessage({type: "Link",message: element.href}, function(response) {});
 			menuSet= true;
 		}
 		else{
 			$(parentElements).each(function(index){
 				if(this.nodeName == "A"){
 
-					chrome.runtime.sendMessage({type: "link",message: String(this.href)}, function(response) {});
+					chrome.runtime.sendMessage({type: "Link",message: String(this.href)}, function(response) {});
 					menuSet = true;
 				}
 				
 				if(this.nodeName == "FORM"){
 					var uri = buildUri(this);
 					if(uri != null){
-						chrome.runtime.sendMessage({type: "form",message: uri}, function(response) {});
+						chrome.runtime.sendMessage({type: "Form",message: uri}, function(response) {});
 						menuSet = true;
 					}
 				}
@@ -27,7 +27,7 @@ document.addEventListener("mousedown", function(event){
 		}
 		
 		if( menuSet == false){
-			chrome.runtime.sendMessage({type: "page",message: document.URL}, function(response) {});
+			chrome.runtime.sendMessage({type: "Page",message: document.URL}, function(response) {});
 		}
 	}
 }, true);

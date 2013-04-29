@@ -1,6 +1,6 @@
 var contexts = ["all"]
 var Clippie = {
-	buildMenu: function(uri){
+	buildMenu: function(uri,type){
 		chrome.contextMenus.removeAll()
 		//chrome.contextMenus.onClicked.addListener(this.itemClick);
 		parsedUri = parseUri(uri);
@@ -11,16 +11,16 @@ var Clippie = {
 			"Full path" : parsedUri.path,
 			"All" :  parsedUri.host + parsedUri.directory + parsedUri.file
 		}
-		this.mainMenu();
+		this.mainMenu(type);
 		this.subMenus();
 		this.domainItems(parsedUri,staticItems);
 		this.getItems(parsedUri);	
 	},
 	
-	mainMenu: function(){
+	mainMenu: function(type){
 		chrome.contextMenus.create({
 			"id" : "ClippieMain",
-			"title" : "Clippie",
+			"title" : type,
 			"contexts" : contexts
 			});
 	},
@@ -92,7 +92,7 @@ var Clippie = {
 
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
-    if (request.type == "link" || request.type == "page" || request.type == "form"){
-		Clippie.buildMenu(request.message);
+    if (request.type == "Link" || request.type == "Page" || request.type == "Form"){
+		Clippie.buildMenu(request.message,request.type);
 	}
 });
