@@ -57,7 +57,9 @@ var Clippie = {
 	},
 	
 	getItems: function(parsedUri){
+		var hasKey = false;
 		for(index in parsedUri.queryKey) { 
+			hasKey = true;
 			if	(parsedUri.queryKey[index] != '' || parsedUri.queryKey[index] != null){
 				chrome.contextMenus.create({
 					"title" : index + " : " + parsedUri.queryKey[index],
@@ -70,6 +72,7 @@ var Clippie = {
 				});
 			}
 		}
+		if(hasKey == false) { chrome.contextMenus.remove("Get") } ;
 	},
 	itemClick: function(e,tab,object){	
 		Clippie.copyToClipboard(object[e.menuItemId])
